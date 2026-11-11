@@ -25,12 +25,17 @@ $brand_name = trim((string)ameza_option('brand_name'));
 $inn = trim((string)ameza_option('inn'));
 $ogrn = trim((string)ameza_option('ogrn'));
 $socials = [];
-foreach (['telegram'=>'Telegram', 'instagram'=>'Instagram', 'wildberries'=>'Wildberries', 'ozon'=>'Ozon'] as $key => $name) {
-    // Original HTML has only a real Telegram address; the other URLs were "#".
-    $socials[] = [
-        'url' => trim((string)ameza_option($key)),
-        'name' => $name,
-    ];
+$links = ameza_option('social_links');
+foreach (is_array($links) ? $links : [] as $link) {
+    if (!is_array($link)) { continue; }
+    $label = trim((string)($link['label'] ?? ''));
+    if ($label === '') { continue; }
+    $url = trim((string)($link['url'] ?? ''));
+    // Text field is flexible, but malformed and placeholder links never become live anchors.
+    if (!preg_match('~^https?://~i', $url)) {
+        $url = '';
+    }
+    $socials[] = ['name'=>$label, 'url'=>$url];
 }
 ?>
 <footer class="site-footer">
