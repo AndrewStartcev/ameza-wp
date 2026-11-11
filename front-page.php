@@ -137,7 +137,7 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
 
 <?php if ($about_title || $about_content || $about_image) : ?>
 <section class="about-production" id="about">
-    <div class="container about-grid<?php echo $about_image ? '' : ' about-grid--single'; ?>">
+    <div class="container about-grid<?php echo ($about_image && ($about_title || $about_content)) ? '' : ' about-grid--single'; ?>">
         <?php if ($about_title || $about_content) : ?>
         <div class="about-text">
             <?php if ($about_title) : ?><h2><?php echo esc_html($about_title); ?></h2><?php endif; ?>

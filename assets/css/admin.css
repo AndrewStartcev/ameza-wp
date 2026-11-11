@@ -1,0 +1,28 @@
+/* AMEZA — compact ACF editing. Scoped to ACF, not the whole WordPress admin. */
+.acf-postbox .acf-fields > .acf-field { padding: 14px 16px; }
+.acf-postbox .acf-field .acf-label label { font-weight: 600; margin-bottom: 6px; }
+.acf-postbox .acf-field input[type="text"],
+.acf-postbox .acf-field input[type="url"],
+.acf-postbox .acf-field input[type="email"],
+.acf-postbox .acf-field input[type="number"],
+.acf-postbox .acf-field textarea { border-radius: 5px; }
+.acf-postbox .acf-field .acf-label p.description { font-size: 12px; }
+.acf-postbox .acf-field[data-name="hero_features"] .acf-table > thead > tr > th,
+.acf-postbox .acf-field[data-name="b2b_bullets"] .acf-table > thead > tr > th,
+.acf-postbox .acf-field[data-name="faqs"] .acf-table > thead > tr > th {
+    background: #f6f7f7;
+    font-weight: 600;
+    font-size: 12px;
+}
+.acf-postbox .acf-field[data-name="hero_features"] .acf-table td,
+.acf-postbox .acf-field[data-name="b2b_bullets"] .acf-table td,
+.acf-postbox .acf-field[data-name="faqs"] .acf-table td {
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+.acf-postbox .acf-repeater .acf-row-handle { background: #f6f7f7; }
+.acf-postbox .acf-image-uploader .image-wrap img { max-height: 105px; object-fit: contain; }
+.acf-postbox .acf-tab-wrap.-left .acf-tab-group li a {
+    padding: 11px 13px;
+    line-height: 1.4;
+}

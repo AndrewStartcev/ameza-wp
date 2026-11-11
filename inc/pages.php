@@ -46,14 +46,8 @@ function ameza_provision_pages(): void {
     if ($privacy_id && !absint(get_option('wp_page_for_privacy_policy', 0))) {
         update_option('wp_page_for_privacy_policy', $privacy_id);
     }
-    if (function_exists('update_field') && function_exists('get_field')) {
-        if ($offer_id && !get_field('offer_page', 'option')) {
-            update_field('field_ameza_offer_page', $offer_id, 'option');
-        }
-        if ($consent_id && !get_field('consent_page', 'option')) {
-            update_field('field_ameza_consent_page', $consent_id, 'option');
-        }
-    }
+    // Linking the legal pages in options is a deliberate editorial choice.
+    // Never auto-fill ACF options after they have been cleared by an editor.
 }
 add_action('admin_init', 'ameza_provision_pages', 30);
 

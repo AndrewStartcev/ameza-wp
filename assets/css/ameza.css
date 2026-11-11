@@ -146,7 +146,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background: linear-gradient(rgba(29,29,29,0.8), rgba(29,29,29,0.95)), var(--ameza-hero-image) center/cover no-repeat;
+            background: linear-gradient(rgba(29,29,29,0.8), rgba(29,29,29,0.95)), var(--ameza-hero-image, none) center/cover no-repeat;
             padding: 120px 20px 80px;
             position: relative;
         }
@@ -680,3 +680,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 768px) {
   .nav-menu > ul { flex-direction: column; align-items: center; gap: 15px; }
 }
+
+/* A single populated column must fill the content width. */
+.about-grid--single, .b2b-content--single, .contacts-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+.footer-logo img { max-width: 190px; max-height: 58px; width: auto; height: auto; object-fit: contain; }
+.footer-grid:has(.footer-brand:only-child) { grid-template-columns: minmax(0, 1fr); }
