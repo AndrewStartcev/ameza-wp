@@ -69,7 +69,15 @@ def download(url: str) -> bytes:
 def save_photo(name: str, url: str) -> None:
     path = OUTPUT / "photos" / f"{name}.jpg"
     path.parent.mkdir(parents=True, exist_ok=True)
-    data = download(url)
+    try:
+        data = download(url)
+    except RuntimeError:
+        if name != "product":
+            raise
+        # The original product photo URL now returns 404.
+        replacement = "https://unsplash.com/photos/_ZK691wQaS0/download?force=true&w=800"
+        data = download(replacement)
+        print("Original product image is unavailable; replacement: Unsplash _ZK691wQaS0")
     with Image.open(BytesIO(data)) as original:
         image = ImageOps.exif_transpose(original).convert("RGB")
         if image.width < 100 or image.height < 100:
