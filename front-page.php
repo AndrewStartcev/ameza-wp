@@ -16,7 +16,7 @@ $about_image = ameza_media_url(ameza_field('about_image', 0), 'img/factory.svg')
         <div class="hero-features">
         <?php foreach ((array)ameza_field('hero_features') as $feature) : ?>
             <div class="hero-feature-item">
-                <?php ameza_icon((string)($feature['icon']??'check-circle')); ?>
+                <?php ameza_icon((string)($feature['icon']??'check-circle'), absint($feature['icon_image']??0)); ?>
                 <span><?php echo esc_html((string)($feature['text']??'')); ?></span>
             </div>
         <?php endforeach; ?>
@@ -31,7 +31,7 @@ $about_image = ameza_media_url(ameza_field('about_image', 0), 'img/factory.svg')
         <div class="advantages-grid">
             <?php foreach ((array)ameza_field('advantages') as $item) : ?>
             <article class="advantage-card">
-                <?php ameza_icon((string)($item['icon']??'check-circle')); ?>
+                <?php ameza_icon((string)($item['icon']??'check-circle'), absint($item['icon_image']??0)); ?>
                 <h3><?php echo esc_html((string)($item['title']??'')); ?></h3>
                 <p><?php echo esc_html((string)($item['text']??'')); ?></p>
             </article>
