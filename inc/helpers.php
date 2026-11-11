@@ -114,3 +114,55 @@ add_action('admin_notices', static function (): void {
         );
     }
 });
+
+
+/**
+ * Read renamed ACF repeater headings, with legacy raw postmeta fallback.
+ * ACF's old field names were "title"; on existing pages this data can remain
+ * under products_0_title / advantages_0_title after changing the field group.
+ */
+function ameza_card_heading(array $row, string $group, int $index): string {
+    $field = $group === 'products' ? 'product_title' : 'advantage_title';
+    $value = trim((string)($row[$field] ?? $row['title'] ?? ''));
+    if ($value !== '') {
+        return $value;
+    }
+    $page_id = absint(get_queried_object_id());
+    if ($page_id) {
+        $previous = get_post_meta($page_id, $group . '_' . $index . '_title', true);
+        if (is_scalar($previous)) {
+            return trim((string)$previous);
+        }
+    }
+    return '';
+}
+
+/**
+ * Render only legitimate Yandex Maps constructor scripts or map-widget iframes.
+ * Never evaluate pasted HTML directly. All attributes and URLs are reconstructed.
+ */
+function ameza_yandex_map_embed(string $html): string {
+    if ($html === '') {
+        return '';
+    }
+    if (!preg_match('~<(script|iframe)\b[^>]*\bsrc\s*=\s*(["\'])(.*?)\2~is', $html, $m)) {
+        return '';
+    }
+    $type = strtolower($m[1]);
+    $url = html_entity_decode(trim($m[3]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $parts = wp_parse_url($url);
+    if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https') {
+        return '';
+    }
+    $host = strtolower((string)($parts['host'] ?? ''));
+    $path = (string)($parts['path'] ?? '');
+    if ($type === 'script' && $host === 'api-maps.yandex.ru' &&
+        str_starts_with($path, '/services/constructor/1.0/js/')) {
+        return '<script async src="' . esc_url($url) . '"></script>';
+    }
+    if ($type === 'iframe' && in_array($host, ['yandex.ru','yandex.com','yandex.kz'], true) &&
+        str_starts_with($path, '/map-widget/v1/')) {
+        return '<iframe src="' . esc_url($url) . '" title="Карта проезда" width="100%" height="340" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+    }
+    return '';
+}
