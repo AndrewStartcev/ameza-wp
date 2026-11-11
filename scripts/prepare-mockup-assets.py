@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download exactly the three image sources and Font Awesome icons used in the supplied HTML.
+"""Download available HTML source photos, a documented product replacement and Font Awesome icons.
 
 Outputs:
   assets/uploads-ready/photos/{hero,production,product}.jpg
