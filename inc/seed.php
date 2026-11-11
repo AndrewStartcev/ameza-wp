@@ -116,7 +116,8 @@ function ameza_rebuild_home_from_html_v4(): void {
     foreach ($source['advantages'] as &$item) {
         $name = (string)($item['icon'] ?? '');
         $item['icon_image'] = $name ? ($images['icon-' . $name] ?? 0) : 0;
-        unset($item['icon']);
+        $item['advantage_title'] = (string)($item['title'] ?? '');
+        unset($item['icon'], $item['title']);
     }
     unset($item);
     foreach ($source['b2b_bullets'] as &$item) {
@@ -125,6 +126,8 @@ function ameza_rebuild_home_from_html_v4(): void {
     unset($item);
     foreach ($source['products'] as &$item) {
         unset($item['image_asset']);
+        $item['product_title'] = (string)($item['title'] ?? '');
+        unset($item['title']);
         $item['image'] = $images['product'];
     }
     unset($item);
@@ -210,3 +213,89 @@ function ameza_seed_navigation_menus(): void {
     update_option('ameza_navigation_seeded_v1', '1', false);
 }
 add_action('admin_init', 'ameza_seed_navigation_menus', 70);
+
+
+/**
+ * One-time upgrade of legacy repeater "title" fields.
+ * The old raw postmeta contains the correct titles even if new ACF schema
+ * no longer exposes their old subfield names in formatted get_field().
+ */
+function ameza_migrate_card_titles_v5(): void {
+    if (!is_admin() || !current_user_can('manage_options') ||
+        !function_exists('get_field') || !function_exists('update_field') ||
+        get_option('ameza_card_titles_migrated_v5') === 'complete') {
+        return;
+    }
+    $page_id = absint(get_option('page_on_front', 0));
+    if (!$page_id || get_post_type($page_id) !== 'page') {
+        return;
+    }
+    $source = ameza_seed_source();
+    foreach ([
+        'products' => 'product_title',
+        'advantages' => 'advantage_title',
+    ] as $group => $new_field) {
+        $rows = get_field($group, $page_id);
+        if (!is_array($rows) || !$rows) {
+            continue;
+        }
+        $updated = false;
+        foreach ($rows as $index => &$row) {
+            if (!is_array($row) || trim((string)($row[$new_field] ?? '')) !== '') {
+                continue;
+            }
+            $value = get_post_meta($page_id, $group . '_' . $index . '_title', true);
+            if (!is_scalar($value) || trim((string)$value) === '') {
+                $value = $source[$group][$index]['title'] ?? '';
+            }
+            if (is_scalar($value) && trim((string)$value) !== '') {
+                $row[$new_field] = trim((string)$value);
+                unset($row['title']);
+                $updated = true;
+            }
+        }
+        unset($row);
+        if ($updated) {
+            update_field('field_ameza_' . $group, $rows, $page_id);
+        }
+    }
+    update_option('ameza_card_titles_migrated_v5', 'complete', false);
+}
+add_action('admin_init', 'ameza_migrate_card_titles_v5', 90);
+
+/**
+ * Migrate four legacy social URLs into a single editable ACF repeater.
+ * Old "#" placeholders never become clickable URLs.
+ */
+function ameza_migrate_social_links_v5(): void {
+    if (!is_admin() || !current_user_can('manage_options') ||
+        !function_exists('get_field') || !function_exists('update_field') ||
+        get_option('ameza_social_links_migrated_v5') === 'complete') {
+        return;
+    }
+    $existing = get_field('social_links', 'option');
+    if (is_array($existing) && $existing) {
+        update_option('ameza_social_links_migrated_v5', 'complete', false);
+        return;
+    }
+    $items = [];
+    foreach ([
+        'telegram' => 'Telegram',
+        'instagram' => 'Instagram',
+        'wildberries' => 'Wildberries',
+        'ozon' => 'Ozon',
+    ] as $key=>$label) {
+        $value = get_field($key, 'option');
+        if (!is_scalar($value) || $value === '') {
+            $value = get_option('options_' . $key, '');
+        }
+        $url = is_scalar($value) ? trim((string)$value) : '';
+        if ($url === '#' || !preg_match('~^https?://~i', $url)) {
+            $url = '';
+        }
+        $items[] = ['label'=>$label, 'url'=>$url];
+    }
+    update_field('field_ameza_social_links', $items, 'option');
+    update_option('ameza_social_links_migrated_v5', 'complete', false);
+}
+add_action('admin_init', 'ameza_migrate_social_links_v5', 95);
