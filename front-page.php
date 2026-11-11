@@ -16,14 +16,14 @@ $features = array_values(array_filter((array)ameza_field('hero_features'), stati
 
 $advantages = array_values(array_filter((array)ameza_field('advantages'), static function ($row): bool {
     return is_array($row) && (
-        ameza_has_text($row['title'] ?? '') ||
+        ameza_has_text($row['advantage_title'] ?? $row['title'] ?? '') ||
         ameza_has_text($row['text'] ?? '') ||
         !empty($row['icon_image'])
     );
 }));
 $products = array_values(array_filter((array)ameza_field('products'), static function ($row): bool {
     return is_array($row) && (
-        ameza_has_text($row['title'] ?? '') ||
+        ameza_has_text($row['product_title'] ?? $row['title'] ?? '') ||
         ameza_has_text($row['text'] ?? '') ||
         !empty($row['image'])
     );

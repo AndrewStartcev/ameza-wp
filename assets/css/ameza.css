@@ -716,3 +716,35 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .site-footer .footer-links__pending { display: inline; color: #777; font-size: .9rem; }
 .site-footer .footer-bottom__pending { color: #666; font-size: .8rem; cursor: default; }
 .site-footer .footer-bottom__links { flex-wrap: wrap; }
+
+/* Card headings are explicit elements again after the ACF subfield rename. */
+.advantages-grid .advantage-card h3,
+.assortment-grid .product-card h3 {
+    display: block;
+    visibility: visible;
+    color: var(--accent-beige);
+    opacity: 1;
+    font-family: var(--font-accent);
+}
+.assortment-grid .product-card h3 {
+    font-size: 1.3rem;
+    line-height: 1.4;
+    margin: 0 0 10px;
+}
+
+/* Raw Yandex Constructor iframe/script is rendered only after host validation. */
+.contact-map {
+    width: 100%;
+    min-height: 310px;
+    margin-top: 28px;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: #292929;
+}
+.contact-map iframe,
+.contact-map > div {
+    display: block;
+    width: 100% !important;
+    max-width: 100%;
+    border: 0;
+}
