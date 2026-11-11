@@ -80,7 +80,11 @@ add_action('acf/init', static function (): void {
             ameza_acf_short_text('telegram_label', 'Подпись Telegram', 50),
             ameza_acf_short_text('address', 'Адрес', 100),
             ameza_acf_short_text('header_cta_text', 'Текст кнопки в шапке', 50),
-            ameza_acf_field('map_url', 'Ссылка на карту', 'url', 50),
+            ameza_acf_field('map_embed', 'Код Яндекс Карты (Конструктор)', 'textarea', 100, [
+                'rows' => 6,
+                'new_lines' => '',
+                'instructions' => 'Вставь HTML-код из конструктора Яндекс Карт (script или iframe). Выводятся только официальные адреса Яндекса.',
+            ]),
 
             ameza_acf_tab('site_tab_legal', 'Документы и реквизиты'),
             ameza_acf_short_text('company_name', 'Юридическое название', 100),
@@ -94,9 +98,10 @@ add_action('acf/init', static function (): void {
             ameza_acf_short_text('contacts_form_shortcode', 'Шорткод формы контактов', 50),
 
             ameza_acf_tab('site_tab_social', 'Соцсети и маркетплейсы'),
-            ameza_acf_field('instagram', 'Instagram (URL)', 'url', 50),
-            ameza_acf_field('wildberries', 'Wildberries (URL)', 'url', 50),
-            ameza_acf_field('ozon', 'Ozon (URL)', 'url', 50),
+            ameza_acf_repeater('social_links', 'Ссылки в подвале', [
+                ameza_acf_short_text('label', 'Название', 35),
+                ameza_acf_short_text('url', 'Ссылка', 65),
+            ], 'table'),
         ],
         'location' => [[['param'=>'options_page', 'operator'=>'==', 'value'=>'ameza-settings']]],
         'menu_order' => 0,
@@ -126,7 +131,7 @@ add_action('acf/init', static function (): void {
             ameza_acf_intro('advantages_subtitle', 'Подзаголовок'),
             ameza_acf_repeater('advantages', 'Карточки преимуществ', [
                 ameza_acf_image('icon_image', 'Иконка', 35),
-                ameza_acf_short_text('title', 'Заголовок', 65),
+                ameza_acf_short_text('advantage_title', 'Заголовок', 65),
                 ameza_acf_intro('text', 'Описание'),
             ]),
 
@@ -135,7 +140,7 @@ add_action('acf/init', static function (): void {
             ameza_acf_intro('products_subtitle', 'Подзаголовок'),
             ameza_acf_repeater('products', 'Карточки продукции', [
                 ameza_acf_image('image', 'Фотография', 25),
-                ameza_acf_short_text('title', 'Название', 40),
+                ameza_acf_short_text('product_title', 'Название', 40),
                 ameza_acf_short_text('button_text', 'Текст кнопки', 35),
                 ameza_acf_intro('text', 'Описание'),
             ]),
