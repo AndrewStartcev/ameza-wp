@@ -37,26 +37,6 @@ function ameza_acf_repeater(string $name, string $label, array $fields, string $
     ]);
 }
 
-function ameza_acf_icon(int $width = 25): array {
-    return ameza_acf_field('icon', 'Иконка', 'select', $width, [
-        'choices' => [
-            'factory' => 'Производство',
-            'check-circle' => 'Качество',
-            'tags' => 'Цены и предложения',
-            'certificate' => 'Сертификат',
-            'search' => 'Контроль',
-            'palette' => 'Ассортимент',
-            'handshake' => 'Сотрудничество',
-            'chart' => 'Статистика',
-            'check' => 'Галочка',
-            'star' => 'Звезда',
-        ],
-        'allow_null' => 1,
-        'ui' => 1,
-        'placeholder' => 'Без иконки',
-    ]);
-}
-
 function ameza_acf_image(string $name, string $label, int $width = 100): array {
     return ameza_acf_field($name, $label, 'image', $width, ['return_format' => 'id', 'preview_size' => 'thumbnail']);
 }
@@ -134,18 +114,16 @@ add_action('acf/init', static function (): void {
             ameza_acf_short_text('hero_secondary_text', 'Кнопка «Опт»', 50),
             // Three adjacent compact columns per entry instead of big vertical cards.
             ameza_acf_repeater('hero_features', 'Преимущества под кнопками', [
-                ameza_acf_icon(25),
-                ameza_acf_image('icon_image', 'Своя иконка', 25),
-                ameza_acf_short_text('text', 'Подпись', 50),
+                ameza_acf_image('icon_image', 'Иконка', 35),
+                ameza_acf_short_text('text', 'Подпись', 65),
             ], 'table'),
 
             ameza_acf_tab('home_tab_advantages', 'Преимущества'),
             ameza_acf_short_text('advantages_title', 'Заголовок', 100),
             ameza_acf_intro('advantages_subtitle', 'Подзаголовок'),
             ameza_acf_repeater('advantages', 'Карточки преимуществ', [
-                ameza_acf_icon(25),
-                ameza_acf_image('icon_image', 'Своя иконка', 25),
-                ameza_acf_short_text('title', 'Заголовок', 50),
+                ameza_acf_image('icon_image', 'Иконка', 35),
+                ameza_acf_short_text('title', 'Заголовок', 65),
                 ameza_acf_intro('text', 'Описание'),
             ]),
 
@@ -169,7 +147,7 @@ add_action('acf/init', static function (): void {
             ameza_acf_short_text('b2b_title', 'Заголовок', 100),
             ameza_acf_intro('b2b_text', 'Описание'),
             ameza_acf_repeater('b2b_bullets', 'Условия опта', [
-                ameza_acf_icon(30),
+                ameza_acf_image('icon_image', 'Иконка', 30),
                 ameza_acf_short_text('text', 'Условие', 70),
             ], 'table'),
             ameza_acf_short_text('b2b_form_title', 'Заголовок формы', 100),

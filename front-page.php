@@ -10,7 +10,6 @@ $hero_secondary = trim((string)ameza_field('hero_secondary_text'));
 $features = array_values(array_filter((array)ameza_field('hero_features'), static function ($row): bool {
     return is_array($row) && (
         ameza_has_text($row['text'] ?? '') ||
-        ameza_has_text($row['icon'] ?? '') ||
         !empty($row['icon_image'])
     );
 }));
@@ -19,7 +18,6 @@ $advantages = array_values(array_filter((array)ameza_field('advantages'), static
     return is_array($row) && (
         ameza_has_text($row['title'] ?? '') ||
         ameza_has_text($row['text'] ?? '') ||
-        ameza_has_text($row['icon'] ?? '') ||
         !empty($row['icon_image'])
     );
 }));
@@ -75,7 +73,7 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
         <div class="hero-features">
             <?php foreach ($features as $feature) : ?>
             <div class="hero-feature-item">
-                <?php ameza_icon((string)($feature['icon'] ?? ''), absint($feature['icon_image'] ?? 0)); ?>
+                <?php ameza_icon('', absint($feature['icon_image'] ?? 0)); ?>
                 <?php if (ameza_has_text($feature['text'] ?? '')) : ?><span><?php echo esc_html($feature['text']); ?></span><?php endif; ?>
             </div>
             <?php endforeach; ?>
@@ -95,7 +93,7 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
         <div class="advantages-grid">
             <?php foreach ($advantages as $item) : ?>
             <article class="advantage-card">
-                <?php ameza_icon((string)($item['icon'] ?? ''), absint($item['icon_image'] ?? 0)); ?>
+                <?php ameza_icon('', absint($item['icon_image'] ?? 0)); ?>
                 <?php if (ameza_has_text($item['title'] ?? '')) : ?><h3><?php echo esc_html($item['title']); ?></h3><?php endif; ?>
                 <?php if (ameza_has_text($item['text'] ?? '')) : ?><p><?php echo esc_html($item['text']); ?></p><?php endif; ?>
             </article>
@@ -166,7 +164,7 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
                 <ul>
                     <?php foreach ($b2b_bullets as $bullet) : ?>
                     <li>
-                        <?php ameza_icon((string)($bullet['icon'] ?? '')); ?>
+                        <?php ameza_icon('', absint($bullet['icon_image'] ?? 0)); ?>
                         <span><?php echo esc_html($bullet['text']); ?></span>
                     </li>
                     <?php endforeach; ?>
