@@ -711,3 +711,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 768px) {
  .site-footer .footer-grid { grid-template-columns: 1fr; gap: 28px; }
 }
+
+/* Footer keeps all three mockup columns even while legal templates are drafts. */
+.site-footer .footer-links__pending { display: inline; color: #777; font-size: .9rem; }
+.site-footer .footer-bottom__pending { color: #666; font-size: .8rem; cursor: default; }
+.site-footer .footer-bottom__links { flex-wrap: wrap; }

@@ -3,12 +3,22 @@ defined('ABSPATH') || exit;
 $brand = ameza_brand_html();
 $footer_description = trim((string)ameza_option('footer_description'));
 $has_footer_nav = has_nav_menu('footer');
-$privacy_url = ameza_doc_url('privacy');
-$offer_id = (int)ameza_option('offer_page');
-$consent_id = (int)ameza_option('consent_page');
-$offer_url = $offer_id && get_post_status($offer_id) === 'publish' ? get_permalink($offer_id) : '';
-$consent_url = $consent_id && get_post_status($consent_id) === 'publish' ? get_permalink($consent_id) : '';
-$has_documents = $privacy_url || $offer_url || $consent_url;
+$legal_links = [];
+foreach ([
+    'privacy-policy' => 'Политика конфиденциальности',
+    'public-offer' => 'Публичная оферта',
+    'personal-data-consent' => 'Согласие на обработку ПД',
+] as $slug => $label) {
+    $page = get_page_by_path($slug, OBJECT, 'page');
+    if (!$page instanceof WP_Post || $page->post_status === 'trash') {
+        continue;
+    }
+    $legal_links[] = [
+        'title' => $label,
+        'url' => $page->post_status === 'publish' ? get_permalink($page) : '',
+    ];
+}
+$has_documents = !empty($legal_links);
 
 $company_name = trim((string)ameza_option('company_name'));
 $brand_name = trim((string)ameza_option('brand_name'));
@@ -16,10 +26,11 @@ $inn = trim((string)ameza_option('inn'));
 $ogrn = trim((string)ameza_option('ogrn'));
 $socials = [];
 foreach (['telegram'=>'Telegram', 'instagram'=>'Instagram', 'wildberries'=>'Wildberries', 'ozon'=>'Ozon'] as $key => $name) {
-    $url = trim((string)ameza_option($key));
-    if ($url) {
-        $socials[] = ['url'=>$url, 'name'=>$name];
-    }
+    // Original HTML has only a real Telegram address; the other URLs were "#".
+    $socials[] = [
+        'url' => trim((string)ameza_option($key)),
+        'name' => $name,
+    ];
 }
 ?>
 <footer class="site-footer">
@@ -46,9 +57,15 @@ foreach (['telegram'=>'Telegram', 'instagram'=>'Instagram', 'wildberries'=>'Wild
             <div class="footer-links">
                 <h4>Документы</h4>
                 <ul>
-                    <?php if ($privacy_url) : ?><li><a href="<?php echo esc_url($privacy_url); ?>">Политика конфиденциальности</a></li><?php endif; ?>
-                    <?php if ($offer_url) : ?><li><a href="<?php echo esc_url($offer_url); ?>">Публичная оферта</a></li><?php endif; ?>
-                    <?php if ($consent_url) : ?><li><a href="<?php echo esc_url($consent_url); ?>">Согласие на обработку ПД</a></li><?php endif; ?>
+                    <?php foreach ($legal_links as $document) : ?>
+                    <li>
+                        <?php if ($document['url']) : ?>
+                        <a href="<?php echo esc_url($document['url']); ?>"><?php echo esc_html($document['title']); ?></a>
+                        <?php else : ?>
+                        <span class="footer-links__pending" title="Ссылка появится после публикации документа"><?php echo esc_html($document['title']); ?></span>
+                        <?php endif; ?>
+                    </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
             <?php endif; ?>
@@ -66,7 +83,11 @@ foreach (['telegram'=>'Telegram', 'instagram'=>'Instagram', 'wildberries'=>'Wild
             <?php if ($socials) : ?>
             <div class="footer-bottom__links">
                 <?php foreach ($socials as $social) : ?>
+                <?php if ($social['url']) : ?>
                 <a href="<?php echo esc_url($social['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($social['name']); ?></a>
+                <?php else : ?>
+                <span class="footer-bottom__pending" title="Ссылка ещё не указана в настройках"><?php echo esc_html($social['name']); ?></span>
+                <?php endif; ?>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
