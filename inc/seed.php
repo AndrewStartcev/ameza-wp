@@ -145,8 +145,9 @@ function ameza_seed_landing_content(): void {
         update_option('ameza_landing_content_seeded_v3', '1', false);
     }
 
-    // Upgrade existing repeater rows, filling ONLY missing icon images/rating.
-    // Migrate old select values in the editor from the original HTML mapping.
+    // Migrate pre-existing repeater rows once. Never re-add an icon or rating
+    // the editor intentionally cleared after this upgrade.
+    if (get_option('ameza_landing_repeaters_migrated_v3') !== '1') {
     foreach (['hero_features','advantages','b2b_bullets','reviews'] as $key) {
         $rows = get_field($key, $home_id);
         if (!is_array($rows)) {
@@ -184,6 +185,11 @@ function ameza_seed_landing_content(): void {
         if ($changed) {
             update_field('field_ameza_' . $key, $rows, $home_id);
         }
+    }
+
+    if (ameza_media_attachment_id('icon-factory') && ameza_media_attachment_id('icon-check')) {
+        update_option('ameza_landing_repeaters_migrated_v3', '1', false);
+    }
     }
 
     // Retry until the media importer has completed. Do not change already chosen pictures.
