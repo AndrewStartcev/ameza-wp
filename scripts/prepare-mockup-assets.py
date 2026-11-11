@@ -75,9 +75,9 @@ def save_photo(name: str, url: str) -> None:
         if name != "product":
             raise
         # The original product photo URL now returns 404.
-        replacement = "https://unsplash.com/photos/_ZK691wQaS0/download?force=true&w=800"
+        replacement = "https://images.pexels.com/photos/9594148/pexels-photo-9594148.jpeg?auto=compress&cs=tinysrgb&w=800"
         data = download(replacement)
-        print("Original product image is unavailable; replacement: Unsplash _ZK691wQaS0")
+        print("Original product image is unavailable; replacement: Pexels 9594148")
     with Image.open(BytesIO(data)) as original:
         image = ImageOps.exif_transpose(original).convert("RGB")
         if image.width < 100 or image.height < 100:
