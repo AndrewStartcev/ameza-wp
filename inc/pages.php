@@ -52,6 +52,15 @@ function ameza_provision_pages(): void {
     [$offer_id] = ameza_ensure_page('public-offer', 'Публичная оферта', 'draft');
     [$consent_id] = ameza_ensure_page('personal-data-consent', 'Согласие на обработку персональных данных', 'draft');
 
+    // WordPress may already ship a draft named "Privacy Policy".
+    // Rename only that untouched draft title; never overwrite a customized page.
+    if ($privacy_id) {
+        $privacy = get_post($privacy_id);
+        if ($privacy instanceof WP_Post && $privacy->post_status === 'draft' && $privacy->post_title === 'Privacy Policy') {
+            wp_update_post(['ID' => $privacy_id, 'post_title' => 'Политика конфиденциальности']);
+        }
+    }
+
     if ($home_id && !absint(get_option('page_on_front', 0))) {
         update_option('show_on_front', 'page');
         update_option('page_on_front', $home_id);
