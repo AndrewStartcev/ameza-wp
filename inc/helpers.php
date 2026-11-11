@@ -27,11 +27,36 @@ function ameza_media_url($value, string $fallback): string {
     if (is_array($value) && !empty($value['url'])) {
         return (string)$value['url'];
     }
+    // Use exact photos from the original mockup after a one-time WordPress media import.
+    $sources = [
+        'img/hero-socks.svg' => ['hero', 'uploads-ready/photos/hero.jpg'],
+        'img/factory.svg' => ['production', 'uploads-ready/photos/production.jpg'],
+        'img/product-classic.svg' => ['product', 'uploads-ready/photos/product.jpg'],
+        'img/product-sport.svg' => ['product', 'uploads-ready/photos/product.jpg'],
+        'img/product-brand.svg' => ['product', 'uploads-ready/photos/product.jpg'],
+        'img/product-kids.svg' => ['product', 'uploads-ready/photos/product.jpg'],
+    ];
+    if (isset($sources[$fallback])) {
+        [$key, $source] = $sources[$fallback];
+        if (function_exists('ameza_media_attachment_url')) {
+            $url = ameza_media_attachment_url($key);
+            if ($url !== '') { return $url; }
+        }
+        if (file_exists(get_theme_file_path('assets/' . $source))) {
+            return ameza_asset($source);
+        }
+    }
     return ameza_asset($fallback);
 }
-function ameza_icon(string $name): void {
+function ameza_icon(string $name, int $override_id = 0): void {
     $name = preg_replace('/[^a-z0-9-]/', '', strtolower($name));
-    $url = ameza_asset('icons/' . $name . '.svg');
+    $url = $override_id ? (string) wp_get_attachment_url($override_id) : '';
+    if (!$url && function_exists('ameza_media_attachment_url')) {
+        $url = ameza_media_attachment_url('icon-' . $name);
+    }
+    if (!$url) {
+        $url = ameza_asset('icons/' . $name . '.svg');
+    }
     printf('<span class="ameza-icon" aria-hidden="true" style="--ameza-icon:url(\'%s\')"></span>', esc_url($url));
 }
 function ameza_home_anchor(string $id): string {
@@ -43,7 +68,7 @@ function ameza_doc_url(string $slug): string {
         if ($url) { return $url; }
     }
     $page = get_page_by_path($slug);
-    return $page ? get_permalink($page) : '';
+    return $page && $page->post_status === 'publish' ? get_permalink($page) : '';
 }
 function ameza_print_form(string $key): void {
     $shortcode = trim((string)ameza_option($key . '_form_shortcode', ''));

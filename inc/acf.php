@@ -9,7 +9,7 @@ function ameza_acf_simple(string $name, string $label, string $type = 'text', ar
     return array_merge(['key'=>'field_ameza_' . $name,'name'=>$name,'label'=>$label,'type'=>$type], $extra);
 }
 function ameza_acf_tab(string $name, string $label): array {
-    return ameza_acf_simple($name, $label, 'tab', ['placement'=>'top']);
+    return ameza_acf_simple($name, $label, 'tab', ['placement'=>'left']);
 }
 function ameza_acf_repeater(string $name, string $label, array $sub, array $extra = []): array {
     // ACF keys must be globally unique, including nested repeater subfields.
@@ -67,13 +67,13 @@ add_action('acf/init', static function (): void {
             ameza_acf_simple('hero_primary_text','Первая кнопка'),
             ameza_acf_simple('hero_secondary_text','Вторая кнопка'),
             ameza_acf_repeater('hero_features','Преимущества под кнопками',[
-                ameza_acf_icon(),ameza_acf_simple('text','Подпись')
+                ameza_acf_icon(),ameza_acf_simple('icon_image','Своя иконка (необязательно)','image',['return_format'=>'id']),ameza_acf_simple('text','Подпись')
             ]),
             ameza_acf_tab('home_tab_advantages','Преимущества'),
             ameza_acf_simple('advantages_title','Заголовок'),
             ameza_acf_simple('advantages_subtitle','Подзаголовок','textarea',['rows'=>2]),
             ameza_acf_repeater('advantages','Карточки',[
-                ameza_acf_icon(),ameza_acf_simple('title','Заголовок'),ameza_acf_simple('text','Описание','textarea',['rows'=>3])
+                ameza_acf_icon(),ameza_acf_simple('icon_image','Своя иконка (необязательно)','image',['return_format'=>'id']),ameza_acf_simple('title','Заголовок'),ameza_acf_simple('text','Описание','textarea',['rows'=>3])
             ]),
             ameza_acf_tab('home_tab_products','Продукция'),
             ameza_acf_simple('products_title','Заголовок'),

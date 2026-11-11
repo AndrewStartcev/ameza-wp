@@ -19,8 +19,8 @@
                 <ul>
                     <?php $privacy=ameza_doc_url('privacy'); $offer_id=(int)ameza_option('offer_page',0); $consent_id=(int)ameza_option('consent_page',0); ?>
                     <?php if ($privacy) : ?><li><a href="<?php echo esc_url($privacy); ?>">Политика конфиденциальности</a></li><?php endif; ?>
-                    <?php if ($offer_id) : ?><li><a href="<?php echo esc_url(get_permalink($offer_id)); ?>">Публичная оферта</a></li><?php endif; ?>
-                    <?php if ($consent_id) : ?><li><a href="<?php echo esc_url(get_permalink($consent_id)); ?>">Согласие на обработку ПД</a></li><?php endif; ?>
+                    <?php if ($offer_id && get_post_status($offer_id) === 'publish') : ?><li><a href="<?php echo esc_url(get_permalink($offer_id)); ?>">Публичная оферта</a></li><?php endif; ?>
+                    <?php if ($consent_id && get_post_status($consent_id) === 'publish') : ?><li><a href="<?php echo esc_url(get_permalink($consent_id)); ?>">Согласие на обработку ПД</a></li><?php endif; ?>
                 </ul>
             </div>
         </div>
