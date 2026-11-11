@@ -672,3 +672,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
  html { scroll-behavior: auto; }
  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Ensure fallback navigation and WordPress menus preserve the source layout. */
+.nav-menu > ul { display: flex; align-items: center; gap: 30px; margin: 0; padding: 0; list-style: none; }
+.nav-menu > ul > li { margin: 0; }
+.logo img { max-width: 175px; max-height: 54px; width: auto; height: auto; object-fit: contain; }
+@media (max-width: 768px) {
+  .nav-menu > ul { flex-direction: column; align-items: center; gap: 15px; }
+}

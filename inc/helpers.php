@@ -6,7 +6,9 @@ function ameza_asset(string $path): string {
 }
 function ameza_field(string $key, $fallback = null, $context = false) {
     if ($fallback === null) {
-        $fallback = ameza_defaults()[$key] ?? null;
+        static $defaults = null;
+        if ($defaults === null) { $defaults = ameza_defaults(); }
+        $fallback = $defaults[$key] ?? null;
     }
     if (!function_exists('get_field')) {
         return $fallback;

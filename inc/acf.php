@@ -12,6 +12,11 @@ function ameza_acf_tab(string $name, string $label): array {
     return ameza_acf_simple($name, $label, 'tab', ['placement'=>'top']);
 }
 function ameza_acf_repeater(string $name, string $label, array $sub, array $extra = []): array {
+    // ACF keys must be globally unique, including nested repeater subfields.
+    foreach ($sub as &$field) {
+        $field['key'] = 'field_ameza_' . $name . '_' . $field['name'];
+    }
+    unset($field);
     return ameza_acf_simple($name,$label,'repeater',array_merge(['layout'=>'block','button_label'=>'Добавить запись','sub_fields'=>$sub],$extra));
 }
 function ameza_acf_icon(): array {
