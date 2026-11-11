@@ -76,6 +76,8 @@ add_action('acf/init', static function (): void {
             ameza_acf_field('email', 'Email', 'email', 50),
             ameza_acf_field('telegram', 'Telegram (URL)', 'url', 50),
             ameza_acf_field('whatsapp', 'WhatsApp (URL)', 'url', 50),
+            ameza_acf_short_text('whatsapp_phone', 'Номер в WhatsApp', 50),
+            ameza_acf_short_text('telegram_label', 'Подпись Telegram', 50),
             ameza_acf_short_text('address', 'Адрес', 100),
             ameza_acf_short_text('header_cta_text', 'Текст кнопки в шапке', 50),
             ameza_acf_field('map_url', 'Ссылка на карту', 'url', 50),
@@ -91,7 +93,8 @@ add_action('acf/init', static function (): void {
             ameza_acf_short_text('b2b_form_shortcode', 'Шорткод формы прайс-листа', 50),
             ameza_acf_short_text('contacts_form_shortcode', 'Шорткод формы контактов', 50),
 
-            ameza_acf_tab('site_tab_social', 'Маркетплейсы'),
+            ameza_acf_tab('site_tab_social', 'Соцсети и маркетплейсы'),
+            ameza_acf_field('instagram', 'Instagram (URL)', 'url', 50),
             ameza_acf_field('wildberries', 'Wildberries (URL)', 'url', 50),
             ameza_acf_field('ozon', 'Ozon (URL)', 'url', 50),
         ],

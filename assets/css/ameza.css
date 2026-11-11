@@ -687,3 +687,27 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 .footer-logo img { max-width: 190px; max-height: 58px; width: auto; height: auto; object-fit: contain; }
 .footer-grid:has(.footer-brand:only-child) { grid-template-columns: minmax(0, 1fr); }
+
+/* AMEZA: keep the CF7 comment field compact, consistent with the HTML mockup. */
+.contact-form .wpcf7 textarea,
+.b2b-form-wrapper .wpcf7 textarea,
+.contact-form .form-group textarea,
+.b2b-form-wrapper .form-group textarea {
+    display: block;
+    width: 100%;
+    height: 116px;
+    min-height: 116px;
+    max-height: 180px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+.contact-form .wpcf7 textarea { border-radius: 20px; }
+.contact-form .wpcf7-form-control-wrap,
+.b2b-form-wrapper .wpcf7-form-control-wrap { display: block; }
+.site-footer .footer-grid { grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr) minmax(190px, 1fr); }
+.site-footer .footer-bottom__links { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.site-footer .footer-bottom__links a { margin: 0; }
+.site-footer .footer-links__list { list-style: none; margin: 0; padding: 0; }
+@media (max-width: 768px) {
+ .site-footer .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+}

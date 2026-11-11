@@ -28,7 +28,7 @@ FORM;
     $fields .= $variant === 'b2b' ? <<<'FORM'
 
 <div class="form-group">
-  [textarea your-message placeholder "Комментарий (какая продукция интересует, объёмы)"]
+  [textarea your-message 40x4 placeholder "Комментарий (какая продукция интересует, объёмы)"]
 </div>
 FORM
         : <<<'FORM'
@@ -99,3 +99,31 @@ function ameza_seed_cf7_forms(): void {
     }
 }
 add_action('admin_init', 'ameza_seed_cf7_forms', 75);
+
+
+/**
+ * Refresh ONLY AMEZA-generated forms to use the fixed 4-row textarea.
+ * Preserve all mail settings and unrelated/manual forms.
+ */
+function ameza_update_managed_cf7_layout_v2(): void {
+    if (!is_admin() || !current_user_can('manage_options') ||
+        !class_exists('WPCF7_ContactForm') ||
+        get_option('ameza_managed_cf7_layout_v2') === 'complete') {
+        return;
+    }
+    foreach (['b2b','contacts'] as $variant) {
+        $ids = get_posts([
+            'post_type'=>'wpcf7_contact_form',
+            'post_status'=>'publish',
+            'posts_per_page'=>-1,
+            'fields'=>'ids',
+            'meta_key'=>'_ameza_form_variant',
+            'meta_value'=>$variant,
+        ]);
+        foreach ($ids as $id) {
+            update_post_meta($id, '_form', ameza_seed_form_markup($variant));
+        }
+    }
+    update_option('ameza_managed_cf7_layout_v2', 'complete', false);
+}
+add_action('admin_init', 'ameza_update_managed_cf7_layout_v2', 85);

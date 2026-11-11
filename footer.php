@@ -15,7 +15,7 @@ $brand_name = trim((string)ameza_option('brand_name'));
 $inn = trim((string)ameza_option('inn'));
 $ogrn = trim((string)ameza_option('ogrn'));
 $socials = [];
-foreach (['telegram'=>'Telegram', 'wildberries'=>'Wildberries', 'ozon'=>'Ozon'] as $key => $name) {
+foreach (['telegram'=>'Telegram', 'instagram'=>'Instagram', 'wildberries'=>'Wildberries', 'ozon'=>'Ozon'] as $key => $name) {
     $url = trim((string)ameza_option($key));
     if ($url) {
         $socials[] = ['url'=>$url, 'name'=>$name];

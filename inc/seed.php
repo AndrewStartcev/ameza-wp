@@ -72,178 +72,110 @@ function ameza_seed_source(): array {
 }
 
 
+
 /**
- * One-time content migration for the currently assigned homepage.
- * Only fills empty fields, never overwrites nonempty fields.
- * Existing ACF repeater rows are migrated in place to media-image icons.
+ * The user explicitly approved complete re-population, including already-filled ACF data.
+ * Single version-gated import, never on every page load. Back up existing fields first.
+ * This rewrites only fields owned by the AMEZA theme, not other pages or legal documents.
  */
-function ameza_seed_landing_content(): void {
+function ameza_rebuild_home_from_html_v4(): void {
     if (!is_admin() || !current_user_can('manage_options') ||
-        !function_exists('update_field') || !function_exists('get_field')) {
+        !function_exists('get_field') || !function_exists('update_field') ||
+        get_option('ameza_html_rebuild_v4') === 'complete') {
         return;
     }
-    $home_id = (int)get_option('page_on_front', 0);
+    $home_id = absint(get_option('page_on_front'));
     if (!$home_id || get_post_type($home_id) !== 'page') {
         return;
     }
 
+    // Media is already in WordPress; importer at admin_init:15 resolves these IDs.
+    // Defer instead of writing empty images when deployment hasn't imported media yet.
+    $required = ['hero','production','product','icon-factory','icon-check-circle',
+        'icon-tags','icon-certificate','icon-search','icon-palette',
+        'icon-handshake','icon-chart','icon-check'];
+    $images = [];
+    foreach ($required as $key) {
+        $id = function_exists('ameza_media_attachment_id') ? ameza_media_attachment_id($key) : 0;
+        if (!$id) {
+            return;
+        }
+        $images[$key] = $id;
+    }
+
     $source = ameza_seed_source();
     $source['contacts_info_title'] = 'Контакты';
-    $source['hero_image'] = ameza_media_attachment_id('hero');
-    $source['about_image'] = ameza_media_attachment_id('production');
-    $source['products'] = array_map(static function (array $row): array {
-        unset($row['image_asset']);
-        $row['image'] = ameza_media_attachment_id('product');
-        return $row;
-    }, $source['products']);
+    $source['hero_image'] = $images['hero'];
+    $source['about_image'] = $images['production'];
+    foreach ($source['hero_features'] as &$item) {
+        $name = (string)($item['icon'] ?? '');
+        $item['icon_image'] = $name ? ($images['icon-' . $name] ?? 0) : 0;
+        unset($item['icon']);
+    }
+    unset($item);
+    foreach ($source['advantages'] as &$item) {
+        $name = (string)($item['icon'] ?? '');
+        $item['icon_image'] = $name ? ($images['icon-' . $name] ?? 0) : 0;
+        unset($item['icon']);
+    }
+    unset($item);
+    foreach ($source['b2b_bullets'] as &$item) {
+        $item['icon_image'] = $images['icon-check'];
+    }
+    unset($item);
+    foreach ($source['products'] as &$item) {
+        unset($item['image_asset']);
+        $item['image'] = $images['product'];
+    }
+    unset($item);
+    foreach ($source['reviews'] as &$item) {
+        $item['rating'] = 5;
+    }
+    unset($item);
 
-    foreach (['hero_features', 'advantages'] as $key) {
-        foreach ($source[$key] as &$row) {
-            $icon = (string)($row['icon'] ?? '');
-            $row['icon_image'] = $icon !== '' ? ameza_media_attachment_id('icon-' . $icon) : 0;
-            unset($row['icon']);
-        }
-        unset($row);
-    }
-    foreach ($source['b2b_bullets'] as &$row) {
-        $row['icon_image'] = ameza_media_attachment_id('icon-check');
-    }
-    unset($row);
-    foreach ($source['reviews'] as &$row) {
-        $row['rating'] = 5;
-    }
-    unset($row);
-
-    // Text and list migration only once. Keeps changes the editor has already made.
-    if (get_option('ameza_landing_content_seeded_v3') !== '1') {
-        foreach ($source as $name => $value) {
-            $existing = get_field($name, $home_id);
-            if ($existing !== null && $existing !== false && $existing !== '' && $existing !== []) {
-                continue;
-            }
-            // Media fields are handled below after the image importer has finished.
-            if (in_array($name, ['hero_image', 'about_image'], true)) {
-                continue;
-            }
-            update_field('field_ameza_' . $name, $value, $home_id);
-        }
-        $options = [
-            'brand_name' => 'AMEZA',
-            'footer_description' => 'Производство и продажа премиальных носков. Опт и розница. Собственная фабрика полного цикла.',
-            'phone' => '+7 (495) 123-45-67',
-            'email' => 'info@ameza.ru',
-            'telegram' => 'https://t.me/ameza_brand',
-            'whatsapp' => 'https://wa.me/74951234567',
-            'address' => 'г. Москва, ул. Производственная, д. 10 (офис/склад)',
-            'header_cta_text' => 'Оставить заявку',
-        ];
-        foreach ($options as $name => $value) {
-            if (!get_field($name, 'option')) {
-                update_field('field_ameza_' . $name, $value, 'option');
-            }
-        }
-        update_option('ameza_landing_content_seeded_v3', '1', false);
-    }
-
-    // Migrate pre-existing repeater rows once. Never re-add an icon or rating
-    // the editor intentionally cleared after this upgrade.
-    if (get_option('ameza_landing_repeaters_migrated_v3') !== '1') {
-    foreach (['hero_features','advantages','b2b_bullets','reviews'] as $key) {
-        $rows = get_field($key, $home_id);
-        if (!is_array($rows)) {
-            continue;
-        }
-        $changed = false;
-        foreach ($rows as $i => &$row) {
-            if (!is_array($row)) {
-                continue;
-            }
-            if ($key === 'reviews') {
-                $match = $source[$key][$i] ?? [];
-                if (empty($row['rating']) && ($row['author'] ?? '') === ($match['author'] ?? null)) {
-                    $row['rating'] = 5;
-                    $changed = true;
-                }
-                continue;
-            }
-            $expected = $source[$key][$i] ?? null;
-            $match_field = $key === 'advantages' ? 'title' : 'text';
-            if (!$expected || ($row[$match_field] ?? '') !== ($expected[$match_field] ?? null)) {
-                continue;
-            }
-            if (empty($row['icon_image'])) {
-                $original_icon = $key === 'b2b_bullets' ? 'check' :
-                    (string)(ameza_seed_original_icon($key, $i));
-                $id = ameza_media_attachment_id('icon-' . $original_icon);
-                if ($id) {
-                    $row['icon_image'] = $id;
-                    $changed = true;
-                }
-            }
-        }
-        unset($row);
-        if ($changed) {
-            update_field('field_ameza_' . $key, $rows, $home_id);
-        }
-    }
-
-    if (ameza_media_attachment_id('icon-factory') && ameza_media_attachment_id('icon-check')) {
-        update_option('ameza_landing_repeaters_migrated_v3', '1', false);
-    }
-    }
-
-    // Retry until the media importer has completed. Do not change already chosen pictures.
-    $images_ready = true;
-    foreach (['hero_image'=>'hero','about_image'=>'production'] as $field=>$media) {
-        $id = ameza_media_attachment_id($media);
-        if (!$id) {
-            $images_ready = false;
-            continue;
-        }
-        if (!get_field($field, $home_id) && get_option('ameza_landing_media_seeded_v3') !== '1') {
-            update_field('field_ameza_' . $field, $id, $home_id);
-        }
-    }
-    $product_image = ameza_media_attachment_id('product');
-    if (!$product_image) {
-        $images_ready = false;
-    } elseif (get_option('ameza_landing_media_seeded_v3') !== '1') {
-        $products = get_field('products', $home_id);
-        if (is_array($products)) {
-            $changed = false;
-            foreach ($products as $i=>&$row) {
-                if (is_array($row) && empty($row['image']) &&
-                    ($row['title']??'') === ($source['products'][$i]['title']??null)) {
-                    $row['image'] = $product_image;
-                    $changed = true;
-                }
-            }
-            unset($row);
-            if ($changed) {
-                update_field('field_ameza_products', $products, $home_id);
-            }
-        }
-    }
-    if ($images_ready) {
-        update_option('ameza_landing_media_seeded_v3', '1', false);
-    }
-}
-add_action('admin_init', 'ameza_seed_landing_content', 65);
-
-/** Legacy icon mapping only for upgrading rows copied from the original mockup. */
-function ameza_seed_original_icon(string $group, int $index): string {
-    $icons = [
-        'hero_features' => ['factory','check-circle','tags','certificate'],
-        'advantages' => ['factory','search','palette','handshake','certificate','chart'],
-        'b2b_bullets' => ['check','check','check','check','check'],
+    // Existing contacts from the HTML prototype, not verified company information.
+    // Never write fake legal identity, INN or OGRN.
+    $options = [
+        'brand_name' => 'AMEZA',
+        'footer_description' => 'Производство и продажа премиальных носков. Опт и розница. Собственная фабрика полного цикла.',
+        'phone' => '+7 (495) 123-45-67',
+        'email' => 'info@ameza.ru',
+        'telegram' => 'https://t.me/ameza_brand',
+        'telegram_label' => '@ameza_brand',
+        'whatsapp' => 'https://wa.me/74951234567',
+        'whatsapp_phone' => '+7 (495) 123-45-67',
+        'address' => 'г. Москва, ул. Производственная, д. 10 (офис/склад)',
+        'header_cta_text' => 'Оставить заявку',
     ];
-    return (string)($icons[$group][$index] ?? '');
-}
 
-/**
- * Create two editable navigation menus when the site's respective location is empty.
- * Do not alter a menu that the site administrator has already assigned.
- */
+    // Snapshot of only the values that are about to be overwritten.
+    if (!get_option('ameza_html_rebuild_backup_v4')) {
+        $backup = [
+            'at' => current_time('mysql'),
+            'home_id' => $home_id,
+            'post_fields' => [],
+            'options' => [],
+        ];
+        foreach ($source as $key => $value) {
+            $backup['post_fields'][$key] = get_field($key, $home_id);
+        }
+        foreach ($options as $key => $value) {
+            $backup['options'][$key] = get_field($key, 'option');
+        }
+        add_option('ameza_html_rebuild_backup_v4', $backup, '', 'no');
+    }
+
+    foreach ($source as $key => $value) {
+        update_field('field_ameza_' . $key, $value, $home_id);
+    }
+    foreach ($options as $key => $value) {
+        update_field('field_ameza_' . $key, $value, 'option');
+    }
+
+    update_option('ameza_html_rebuild_v4', 'complete', false);
+}
+add_action('admin_init', 'ameza_rebuild_home_from_html_v4', 65);
+
 function ameza_seed_navigation_menus(): void {
     if (!is_admin() || !current_user_can('manage_options')) { return; }
     if (get_option('ameza_navigation_seeded_v1') === '1') { return; }

@@ -51,6 +51,8 @@ $faqs = array_values(array_filter((array)ameza_field('faqs'), static fn($row) =>
 $contact_phone = trim((string)ameza_option('phone'));
 $contact_email = trim((string)ameza_option('email'));
 $contact_telegram = trim((string)ameza_option('telegram'));
+$telegram_label = trim((string)ameza_option('telegram_label'));
+$whatsapp_number = trim((string)ameza_option('whatsapp_phone')) ?: $contact_phone;
 $contact_whatsapp = trim((string)ameza_option('whatsapp'));
 $contact_address = trim((string)ameza_option('address'));
 $map_url = trim((string)ameza_option('map_url'));
@@ -263,12 +265,12 @@ $contacts_form_title=trim((string)ameza_field('contacts_form_title'));
                 <?php endif; ?>
                 <?php if ($contact_telegram) : ?>
                 <div class="contact-item"><?php ameza_icon('telegram'); ?>
-                    <a href="<?php echo esc_url($contact_telegram); ?>" target="_blank" rel="noopener noreferrer">Telegram</a>
+                    <a href="<?php echo esc_url($contact_telegram); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($telegram_label ?: "Telegram"); ?></a>
                 </div>
                 <?php endif; ?>
                 <?php if ($contact_whatsapp) : ?>
                 <div class="contact-item"><?php ameza_icon('whatsapp'); ?>
-                    <a href="<?php echo esc_url($contact_whatsapp); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                    <a href="<?php echo esc_url($contact_whatsapp); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($whatsapp_number); ?></a>
                 </div>
                 <?php endif; ?>
                 <?php if ($contact_address) : ?>
