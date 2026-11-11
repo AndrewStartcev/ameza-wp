@@ -49,6 +49,50 @@ function ameza_acf_intro(string $name, string $label = 'Описание', int $
     return ameza_acf_field($name, $label, 'textarea', $width, ['rows' => 3, 'new_lines' => '']);
 }
 
+/**
+ * Two editable ACF field groups are stored in WordPress, not only in PHP.
+ * ACF documentation: acf_add_local_field_group() does NOT add groups to admin.
+ *
+ * First admin request: import each group once with its original field keys.
+ * Subsequent requests: use the DB copy so editors can customize fields in UI.
+ * Before the first admin login, register a local fallback for frontend use.
+ *
+ * Never update an existing group automatically: it may contain customizations.
+ */
+function ameza_acf_db_group_exists(string $key): bool {
+    $existing = get_posts([
+        'post_type' => 'acf-field-group',
+        'post_status' => 'any',
+        'name' => $key,
+        'posts_per_page' => 1,
+        'fields' => 'ids',
+        'suppress_filters' => true,
+    ]);
+    return !empty($existing);
+}
+
+function ameza_acf_register_group(array $group): void {
+    $key = (string)($group['key'] ?? '');
+    if ($key === '') {
+        return;
+    }
+
+    if (ameza_acf_db_group_exists($key)) {
+        // Database group is authoritative. Do not shadow it with local PHP.
+        return;
+    }
+
+    if (is_admin() && current_user_can('manage_options') && function_exists('acf_import_field_group')) {
+        $imported = acf_import_field_group($group);
+        if (!is_wp_error($imported) && ameza_acf_db_group_exists($key)) {
+            return;
+        }
+    }
+
+    // Fallback keeps the page usable if ACF cannot persist the DB group yet.
+    acf_add_local_field_group($group);
+}
+
 add_action('acf/init', static function (): void {
     if (!function_exists('acf_add_options_page') || !function_exists('acf_add_local_field_group')) {
         return;
@@ -64,7 +108,7 @@ add_action('acf/init', static function (): void {
         'icon_url' => 'dashicons-store',
     ]);
 
-    acf_add_local_field_group([
+    ameza_acf_register_group([
         'key' => 'group_ameza_options',
         'title' => 'AMEZA — настройки сайта',
         'fields' => [
@@ -110,7 +154,7 @@ add_action('acf/init', static function (): void {
         'label_placement' => 'top',
     ]);
 
-    acf_add_local_field_group([
+    ameza_acf_register_group([
         'key' => 'group_ameza_home',
         'title' => 'AMEZA — главная страница',
         'fields' => [

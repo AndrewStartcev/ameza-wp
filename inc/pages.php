@@ -50,20 +50,3 @@ function ameza_provision_pages(): void {
     // Never auto-fill ACF options after they have been cleared by an editor.
 }
 add_action('admin_init', 'ameza_provision_pages', 30);
-
-add_action('admin_notices', static function (): void {
-    if (!current_user_can('manage_options')) {
-        return;
-    }
-    $pages = [];
-    foreach (['privacy-policy', 'public-offer', 'personal-data-consent'] as $slug) {
-        $page = get_page_by_path($slug, OBJECT, 'page');
-        if ($page && $page->post_status === 'draft') {
-            $pages[] = '<a href="' . esc_url(get_edit_post_link($page->ID)) . '">' . esc_html($page->post_title) . '</a>';
-        }
-    }
-    if ($pages) {
-        echo '<div class="notice notice-warning"><p>AMEZA: юридические страницы пока черновики. Заполни документы и опубликуй: '
-            . implode(', ', $pages) . '.</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-    }
-});
