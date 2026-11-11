@@ -55,9 +55,9 @@ $telegram_label = trim((string)ameza_option('telegram_label'));
 $whatsapp_number = trim((string)ameza_option('whatsapp_phone')) ?: $contact_phone;
 $contact_whatsapp = trim((string)ameza_option('whatsapp'));
 $contact_address = trim((string)ameza_option('address'));
-$map_url = trim((string)ameza_option('map_url'));
+$map_embed = ameza_yandex_map_embed((string)ameza_option('map_embed'));
 $contacts_form = ameza_form_shortcode('contacts');
-$has_contact_info = $contact_phone || $contact_email || $contact_telegram || $contact_whatsapp || $contact_address || $map_url;
+$has_contact_info = $contact_phone || $contact_email || $contact_telegram || $contact_whatsapp || $contact_address || $map_embed;
 ?>
 <main id="main">
 <?php if ($hero_title || $hero_text || $hero_image || $hero_primary || $hero_secondary || $features) : ?>
@@ -93,10 +93,11 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
         <?php if ($advantages_subtitle) : ?><p class="section-subtitle"><?php echo esc_html($advantages_subtitle); ?></p><?php endif; ?>
         <?php if ($advantages) : ?>
         <div class="advantages-grid">
-            <?php foreach ($advantages as $item) : ?>
+            <?php foreach ($advantages as $index => $item) : ?>
+            <?php $advantage_title = ameza_card_heading($item, 'advantages', $index); ?>
             <article class="advantage-card">
                 <?php ameza_icon('', absint($item['icon_image'] ?? 0)); ?>
-                <?php if (ameza_has_text($item['title'] ?? '')) : ?><h3><?php echo esc_html($item['title']); ?></h3><?php endif; ?>
+                <?php if ($advantage_title !== '') : ?><h3><?php echo esc_html($advantage_title); ?></h3><?php endif; ?>
                 <?php if (ameza_has_text($item['text'] ?? '')) : ?><p><?php echo esc_html($item['text']); ?></p><?php endif; ?>
             </article>
             <?php endforeach; ?>
@@ -114,15 +115,18 @@ $has_contact_info = $contact_phone || $contact_email || $contact_telegram || $co
         <?php if ($products_subtitle) : ?><p class="section-subtitle"><?php echo esc_html($products_subtitle); ?></p><?php endif; ?>
         <?php if ($products) : ?>
         <div class="assortment-grid">
-            <?php foreach ($products as $item) : ?>
-            <?php $product_image = ameza_media_url($item['image'] ?? 0); ?>
+            <?php foreach ($products as $index => $item) : ?>
+            <?php
+            $product_title = ameza_card_heading($item, 'products', $index);
+            $product_image = ameza_media_url($item['image'] ?? 0);
+            ?>
             <article class="product-card">
                 <?php if ($product_image) : ?>
                 <div class="product-image">
-                    <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr((string)($item['title'] ?? '')); ?>" loading="lazy" decoding="async">
+                    <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($product_title); ?>" loading="lazy" decoding="async">
                 </div>
                 <?php endif; ?>
-                <?php if (ameza_has_text($item['title'] ?? '')) : ?><h3><?php echo esc_html($item['title']); ?></h3><?php endif; ?>
+                <?php if ($product_title !== '') : ?><h3><?php echo esc_html($product_title); ?></h3><?php endif; ?>
                 <?php if (ameza_has_text($item['text'] ?? '')) : ?><p><?php echo esc_html($item['text']); ?></p><?php endif; ?>
                 <?php if (ameza_has_text($item['button_text'] ?? '')) : ?>
                 <a href="#b2b" class="btn"><?php echo esc_html($item['button_text']); ?></a>
@@ -278,7 +282,9 @@ $contacts_form_title=trim((string)ameza_field('contacts_form_title'));
                     <span><?php echo esc_html($contact_address); ?></span>
                 </div>
                 <?php endif; ?>
-                <?php if ($map_url) : ?><a class="btn btn-outline" href="<?php echo esc_url($map_url); ?>" target="_blank" rel="noopener noreferrer">Открыть на карте</a><?php endif; ?>
+                <?php if ($map_embed) : ?>
+                <div class="contact-map"><?php echo $map_embed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
             <?php if ($contacts_form) : ?>
